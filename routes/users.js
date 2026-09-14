@@ -305,6 +305,25 @@ router.get('/customer-orders', async (req, res) => {
   }
 });
 
+router.post('/parcel-quote', async (req, res) => {
+  try {
+    const pickup = String(req.body?.pickup ?? req.body?.pickupAddress ?? '').trim();
+    const dropoff = String(req.body?.dropoff ?? req.body?.dropoffAddress ?? '').trim();
+    if (!pickup || !dropoff) {
+      return res.status(400).json({ message: 'عنوان الاستلام والتسليم مطلوبان.' });
+    }
+    const { quoteCourierDeliveryByAddresses } = require('../lib/courier_delivery_quote');
+    const quote = await quoteCourierDeliveryByAddresses(pickup, dropoff);
+    return res.json({
+      distanceKm: quote.distanceKm,
+      deliveryFeeIqd: quote.feeIqd,
+    });
+  } catch (error) {
+    console.error('parcel-quote error:', error);
+    return res.status(500).json({ message: error?.message || 'تعذر حساب سعر التوصيل.' });
+  }
+});
+
 router.post('/parcel-order', async (req, res) => {
   try {
     const phone = requireOptionalAuthorizedPhone(req, res);

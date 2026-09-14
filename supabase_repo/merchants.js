@@ -853,7 +853,6 @@ function productMatchesStoreListing({
   const isBazaarChannel = channel === 'bazar_ghaith';
 
   if (isBazaarChannel) {
-    // LEGACY — bazaar channel removed; no customer listing.
     return false;
   } else if (productService !== requestedCategory) {
     return false;
@@ -916,7 +915,6 @@ function buildProfileByPhoneMap(profiles) {
 }
 
 function canMerchantPublishInBazaar(_profile) {
-  // LEGACY — bazar_ghaith marketplace channel removed from Talab app.
   return false;
 }
 
@@ -944,7 +942,6 @@ function isMerchantServiceEnabled(profile, serviceId) {
 function merchantQualifiesForServiceListing(profile, serviceId) {
   const normalizedServiceId = String(serviceId || '').trim();
   if (normalizedServiceId === 'bazar_ghaith') {
-    // LEGACY — bazaar channel removed; never list for customers.
     return false;
   }
   if (normalizedServiceId === 'beauty') {
@@ -986,7 +983,7 @@ function evaluateBazaarCustomerVisibility(profile, products = []) {
   const notes = [];
   if (profile.is_open === false) notes.push('المتجر مغلق');
   if (isMerchantFrozen(profile)) notes.push('الحساب مجمّد');
-  if (!canMerchantPublishInBazaar(profile)) notes.push('غير مصرّح في البازار');
+  if (!canMerchantPublishInBazaar(profile)) notes.push('غير مصرّح في هذه القناة');
   const services = profileServiceIds(profile);
   if (!services.includes('product') && !services.includes('restaurant')) {
     notes.push('التاجر ليس في قسم منتجات أو مطاعم');
@@ -1070,7 +1067,7 @@ function mapStateItemToProductPayload(item = {}) {
 }
 
 /**
- * LEGACY — bazaar removed from Talab app. No-op kept for older admin callers.
+ * @deprecated removed channel — no-op for older admin callers.
  */
 async function syncMerchantProductsForBazaar(_merchantPhone) {
   return { synced: 0, totalEligible: 0, removed: true };
@@ -1960,8 +1957,7 @@ async function saveMerchantProduct(phone, data = {}, options = {}) {
     data.category ?? data.service_id ?? data.serviceId ?? payload.service_id ?? ''
   ).trim();
   if (targetCategory === 'bazar_ghaith') {
-    // LEGACY — bazaar marketplace channel removed from Talab app.
-    throw new Error('BAZAAR_CHANNEL_REMOVED');
+    throw new Error('FEATURE_REMOVED');
   }
 
   const publishCategory = targetCategory;
@@ -2834,7 +2830,7 @@ async function listMerchantStoresByService({
 }) {
   const normalizedServiceId = String(serviceId || '').trim();
   const channel = String(marketplaceCategory || '').trim();
-  // LEGACY — bazaar channel removed; never list stores for customers.
+
   if (normalizedServiceId === 'bazar_ghaith' || channel === 'bazar_ghaith') {
     return [];
   }
@@ -3501,7 +3497,7 @@ async function listRestaurantStores(subCategoryId = '', { compact = false } = {}
 
 async function listCatalogProducts(category = '', subCategoryId = '') {
   const categoryFilter = String(category || '').trim();
-  // LEGACY — bazaar channel removed; never browse as catalog.
+
   if (categoryFilter === 'bazar_ghaith') {
     return [];
   }

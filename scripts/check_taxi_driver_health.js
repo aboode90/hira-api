@@ -115,7 +115,7 @@ function ageMinutes(iso) {
 
 async function main() {
   const targetPhone = parsePhoneArg();
-  console.log('=== Alghaith taxi / Supabase health ===');
+  console.log('=== Hira taxi / Supabase health ===');
   console.log(`Time: ${new Date().toISOString()}`);
   console.log(`Supabase host: ${String(process.env.SUPABASE_URL || '').replace(/^https?:\/\//, '').split('/')[0] || '—'}`);
   console.log('');

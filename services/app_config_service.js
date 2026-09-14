@@ -107,16 +107,14 @@ async function getEnabledTaxiTypes() {
   return [...enabled];
 }
 
-// LEGACY — bazaar / taxi_delivery removed from Talab app.
-// Destination fields remain for historical trips; product is always disabled.
+// Removed legacy taxi_delivery product — kept for historical config reads only.
 const TAXI_DELIVERY_DEFAULTS = {
   enabled: false,
-  destinationNameAr: 'بازار ومطاعم طلب',
-  destinationLat: 32.9488919,
-  destinationLng: 44.7766857,
-  mapsUrl: 'https://maps.app.goo.gl/fKHmcxYr5gbx3omT6',
-  // كابتن تكسي البازار الحصري (يُستخدم إن كانت القائمة فارغة في الإعدادات).
-  designatedDriverPhones: ['07714520553'],
+  destinationNameAr: '',
+  destinationLat: 0,
+  destinationLng: 0,
+  mapsUrl: '',
+  designatedDriverPhones: [],
 };
 
 function normalizePhoneLast10(phone) {
@@ -417,7 +415,6 @@ async function getCartConfig() {
     : [];
   return {
     ...merged,
-    // LEGACY — bazar_ghaith marketplace channel removed from Talab app.
     enabledCategoryIds: ids.filter(
       (id) => String(id || '').trim() !== 'bazar_ghaith',
     ),
@@ -446,14 +443,13 @@ async function getDeliveryConfig() {
   return _mergeWithDefaults('delivery_config', configs['delivery_config'], {
     defaultFee: 3000,
     processingTimeoutMinutes: 30,
-    // تسعيرة مندوب التوصيل للمتاجر/المطاعم (غير بازار طلب)
-    // الأجرة = max(minFee, distanceKm * ratePerKm)
+    // تسعيرة مندوب التوصيل للمتاجر/المطاعم    // الأجرة = max(minFee, distanceKm * ratePerKm)
     minPerKm: 500,
     maxPerKm: 1500,
     defaultRatePerKm: 700,
     minFee: 1000,
     fastDeliverySurcharge: 2000,
-    // حقول قديمة (للتوافق / بازار إن لزم) — الحساب الجديد لا يعتمد عليها
+    // حقول قديمة (للتوافق) — الحساب الجديد لا يعتمد عليها
     firstFee: 1000,
     includedKm: 1.5,
     extraKm: 250,

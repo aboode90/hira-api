@@ -1689,6 +1689,25 @@ async function createParcelOrder(customerPhone, data = {}) {
   if (!pickup) throw new Error('عنوان الاستلام مطلوب.');
   if (!dropoff) throw new Error('عنوان التسليم مطلوب.');
 
+  let deliveryFeeIqd = Number.parseInt(
+    data.deliveryFeeIqd ?? data.delivery_fee_iqd ?? 0,
+    10,
+  );
+  let distanceKm = Number(data.distanceKm ?? data.distance_km ?? 0) || 0;
+  if (!deliveryFeeIqd || deliveryFeeIqd < 0) {
+    try {
+      const { quoteCourierDeliveryByAddresses } = require('../lib/courier_delivery_quote');
+      const quote = await quoteCourierDeliveryByAddresses(pickup, dropoff);
+      deliveryFeeIqd = quote.feeIqd;
+      distanceKm = quote.distanceKm;
+    } catch (error) {
+      console.warn('parcel fee quote error:', error?.message || error);
+      const { getDeliveryConfig } = require('../services/app_config_service');
+      const cfg = await getDeliveryConfig();
+      deliveryFeeIqd = Number(cfg.minFee) || 1000;
+    }
+  }
+
   const orderId = String(data.id ?? randomUUID()).trim();
   const packageType = String(data.packageType ?? data.package_type ?? 'mail').trim();
   const details = String(data.details ?? data.note ?? '').trim();
@@ -1729,7 +1748,9 @@ async function createParcelOrder(customerPhone, data = {}) {
     receiverPhone,
     paymentMethodAr: 'نقداً عند الاستلام',
     paymentMethodEn: 'Cash on delivery',
-    price: 0,
+    price: deliveryFeeIqd,
+    deliveryFeeIqd,
+    distanceKm: distanceKm > 0 ? distanceKm : undefined,
     itemsCount: 1,
     itemsNameAr: `شحنة ${parcelPackageLabelAr(packageType)}`,
     itemsNameEn: `Parcel ${packageType}`,

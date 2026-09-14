@@ -145,7 +145,7 @@ async function sendPushToTokensDirect(
         msg.android.notification.tag = `${eventKey}:${orderId || Date.now()}`;
       }
       if (isIncomingCall) {
-        msg.android.collapseKey = 'alghaith_incoming_call';
+        msg.android.collapseKey = 'hira_incoming_call';
         msg.android.ttl = 120000;
       }
       if (orderId && !isTaxiRequest) {

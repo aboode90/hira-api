@@ -236,9 +236,8 @@ async function notifyNewTaxiRequest(requestMeta, nearbyDrivers = [], options = {
   let tripKindAr = 'ذهاب فقط';
   if (isOpenTrip) {
     tripKindAr = 'رحلة مفتوحة';
-  } else if (isDelivery) {
-    tripKindAr = 'توصيل بازار';
   } else if (
+    isDelivery ||
     tripTypeRaw === 'round_trip' ||
     tripTypeRaw === 'bazaar_round_trip' ||
     requestMeta.isRoundTrip === true ||
@@ -265,8 +264,6 @@ async function notifyNewTaxiRequest(requestMeta, nearbyDrivers = [], options = {
       ? isOpenTrip
         ? `⚡ مستعجل — رحلة مفتوحة`
         : `⚡ مستعجل — الأجرة ${fareValue.toLocaleString('en-US')} د.ع`
-      : isDelivery
-      ? '🚕 طلب تكسي البازار'
       : isAdminCustomer
         ? `🚕 طلب ${taxiTypeAr} · الادمن — ${tripKindAr}`
         : `🚕 طلب ${taxiTypeAr} — ${tripKindAr}`,
@@ -274,8 +271,6 @@ async function notifyNewTaxiRequest(requestMeta, nearbyDrivers = [], options = {
       ? isOpenTrip
         ? 'الزبون مستعجل — افتح الطلب'
         : `الزبون رفع الأجرة إلى ${fareValue.toLocaleString('en-US')} د.ع — افتح الطلب`
-      : isDelivery
-      ? 'طلب توصيل إلى بازار ومطاعم طلب — افتح التطبيق لعرض التفاصيل.'
       : isAdminCustomer
         ? 'الادمن — افتح التطبيق لعرض التفاصيل.'
         : richBody
@@ -586,9 +581,8 @@ async function notifySingleDriver(requestMeta, driverPhone) {
   let tripKindAr = 'ذهاب فقط';
   if (serviceKindRaw === 'open_trip' || tripModeRaw === 'open') {
     tripKindAr = 'رحلة مفتوحة';
-  } else if (serviceKindRaw === 'taxi_delivery') {
-    tripKindAr = 'توصيل بازار';
   } else if (
+    serviceKindRaw === 'taxi_delivery' ||
     tripTypeRaw === 'round_trip' ||
     tripTypeRaw === 'bazaar_round_trip' ||
     requestMeta.isRoundTrip === true ||

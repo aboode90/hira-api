@@ -420,10 +420,9 @@ router.get('/admin/taxi-delivery', async (req, res) => {
 });
 
 router.put('/admin/taxi-delivery', async (_req, res) => {
-  // LEGACY — taxi_delivery / bazaar product removed from Talab app.
   return res.status(410).json({
-    message: 'خدمة تكسي البازار أُزيلت من التطبيق ولم تعد متاحة.',
-    code: 'TAXI_DELIVERY_REMOVED',
+    message: 'هذه الميزة لم تعد متاحة.',
+    code: 'FEATURE_REMOVED',
   });
 });
 
@@ -468,10 +467,9 @@ router.put('/admin/phone-taxi', async (req, res) => {
 });
 
 router.post('/admin/taxi-delivery/from-maps-url', async (_req, res) => {
-  // LEGACY — taxi_delivery / bazaar product removed from Talab app.
   return res.status(410).json({
-    message: 'خدمة تكسي البازار أُزيلت من التطبيق ولم تعد متاحة.',
-    code: 'TAXI_DELIVERY_REMOVED',
+    message: 'هذه الميزة لم تعد متاحة.',
+    code: 'FEATURE_REMOVED',
   });
 });
 

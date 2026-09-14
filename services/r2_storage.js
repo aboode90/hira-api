@@ -21,7 +21,7 @@ function getR2Client() {
 }
 
 function getR2BucketName() {
-  return String(process.env.R2_BUCKET_NAME || 'alghaith-images').trim();
+  return String(process.env.R2_BUCKET_NAME || 'hira-images').trim();
 }
 
 function getR2PublicBaseUrl() {

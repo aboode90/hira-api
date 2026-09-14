@@ -26,7 +26,7 @@ const PRODUCT_SERVICE = 'product';
 function isShoppingProductRow(row) {
   if (!row) return false;
   const category = String(row.category || row.service_id || '').trim();
-  // LEGACY — bazar_ghaith is no longer a browsable shopping channel.
+
   return category === PRODUCT_SERVICE;
 }
 

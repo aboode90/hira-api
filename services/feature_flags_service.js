@@ -14,13 +14,6 @@ const FLAG_DEFINITIONS = [
     defaultValue: true,
   },
   {
-    key: 'taxi_delivery_enabled',
-    group: 'product',
-    labelAr: 'تكسي توصيل (قديم — معطّل)',
-    descriptionAr: 'توصيل البازار عبر التكسي (متوقف — أُزيل من التطبيق)',
-    defaultValue: false,
-  },
-  {
     key: 'phone_taxi_enabled',
     group: 'product',
     labelAr: 'طلب سيارة هاتفياً',
@@ -149,8 +142,6 @@ function normalizeFlags(raw = {}) {
       merged[def.key] = process.env[envKey] === 'true' || process.env[envKey] === '1';
     }
   }
-  // LEGACY — taxi_delivery / bazaar product removed from Talab app.
-  merged.taxi_delivery_enabled = false;
   return merged;
 }
 

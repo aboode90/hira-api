@@ -1586,9 +1586,8 @@ async function getAdminProfessionalDetails(adminPhone, professionalPhone, option
 }
 
 async function toggleBazaarMemberStatus(_adminPhone, _merchantPhone, _isBazaarMember) {
-  // LEGACY — bazaar marketplace channel removed from Talab app.
-  const err = new Error('قناة بازار طلب أُزيلت من التطبيق ولم تعد متاحة.');
-  err.code = 'BAZAAR_REMOVED';
+  const err = new Error('هذه الميزة لم تعد متاحة.');
+  err.code = 'FEATURE_REMOVED';
   err.statusCode = 410;
   throw err;
 }
@@ -4116,7 +4115,7 @@ const DEFAULT_APP_UPDATE_POLICY = Object.freeze({
   optionalUpdateMessageAr:
     'يتوفر تحديث جديد للتطبيق في المتجر. ننصح بالتحديث للحصول على آخر التحسينات.',
   androidStoreUrl:
-    'https://play.google.com/store/apps/details?id=com.alghaith.app',
+    'https://play.google.com/store/apps/details?id=com.hira.app',
   iosStoreUrl: 'https://apps.apple.com/app/id6776741811',
 });
 

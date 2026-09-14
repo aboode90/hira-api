@@ -6,9 +6,9 @@ const ANDROID_TAXI_REQUEST_CHANNEL_ID = 'hira_taxi_requests_v1';
 const ANDROID_INCOMING_CALL_CHANNEL_ID = 'hira_incoming_calls_v1';
 // 'default' يجعل أندرويد يستخدم صوت إشعارات النظام الافتراضي بدل صوت مخصص.
 const ANDROID_NOTIFICATION_SOUND = 'default';
-const ANDROID_INCOMING_CALL_SOUND = 'alghaith_incoming_call';
-const IOS_NOTIFICATION_SOUND = 'alghaith_notify.wav';
-const IOS_INCOMING_CALL_SOUND = 'alghaith_incoming_call.wav';
+const ANDROID_INCOMING_CALL_SOUND = 'hira_incoming_call';
+const IOS_NOTIFICATION_SOUND = 'hira_notify.wav';
+const IOS_INCOMING_CALL_SOUND = 'hira_incoming_call.wav';
 
 let initialized = false;
 

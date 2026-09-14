@@ -28,7 +28,7 @@ const {
 
 const PHONE = '07732487645';
 const STORE_NAME = 'أجنحة ومشويات عبدالله';
-const ADDRESS = 'الصويرة - الشارع العام - بازار ومطاعم طلب';
+const ADDRESS = 'الصويرة - الشارع العام';
 const DESCRIPTION =
   'مطعم مشويات — مستعدون لتجهيز كافة المناسبات';
 const LAT = 32.9488919;

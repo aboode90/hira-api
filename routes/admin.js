@@ -472,18 +472,16 @@ router.put('/admin/merchant-rejection', async (req, res) => {
 });
 
 router.put('/admin/merchant-bazaar', async (_req, res) => {
-  // LEGACY — bazaar marketplace channel removed from Talab app.
   return res.status(410).json({
-    message: 'قناة بازار طلب أُزيلت من التطبيق ولم تعد متاحة.',
-    code: 'BAZAAR_REMOVED',
+    message: 'هذه الميزة لم تعد متاحة.',
+    code: 'FEATURE_REMOVED',
   });
 });
 
 router.post('/admin/merchant-bazaar-sync', async (_req, res) => {
-  // LEGACY — bazaar marketplace channel removed from Talab app.
   return res.status(410).json({
-    message: 'قناة بازار طلب أُزيلت من التطبيق ولم تعد متاحة.',
-    code: 'BAZAAR_REMOVED',
+    message: 'هذه الميزة لم تعد متاحة.',
+    code: 'FEATURE_REMOVED',
   });
 });
 

@@ -79,12 +79,9 @@ function isAllowedCorsOrigin(origin) {
   const host = normalizeOriginHost(origin);
   // نطاقات لوحة الإدارة / الموقع العام (مع أو بدون www).
   if (
-    host === 'alghaithst.com' ||
-    host === 'www.alghaithst.com' ||
-    host === 'alghaithst.iq' ||
-    host === 'www.alghaithst.iq' ||
-    host.endsWith('.alghaithst.com') ||
-    host.endsWith('.alghaithst.iq') ||
+    host === 'hirasite.com' ||
+    host === 'www.hirasite.com' ||
+    host.endsWith('.hirasite.com') ||
     host.endsWith('.vercel.app')
   ) {
     return true;

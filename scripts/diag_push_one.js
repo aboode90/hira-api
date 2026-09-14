@@ -40,7 +40,7 @@ async function main() {
           priority: 'high',
           ttl: 3600000,
           notification: {
-            channelId: 'alghaith_orders_v7',
+            channelId: 'hira_orders_v1',
             sound: 'default',
             priority: 'high',
             visibility: 'public',

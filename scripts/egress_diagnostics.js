@@ -50,7 +50,7 @@ async function main() {
   }
 
   const supabase = createClient(supabaseUrl, serviceKey);
-  console.log('=== Alghaith egress diagnostics ===\n');
+  console.log('=== Hira egress diagnostics ===\n');
 
   const checks = [
     ['merchant_products', 'image_base64'],

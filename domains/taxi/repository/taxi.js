@@ -567,7 +567,7 @@ function generateRequestNumber() {
   return result;
 }
 
-/** كود رحلة بازار من 3 أرقام — فريد بين الرحلات النشطة. */
+/** كود رحلة توصيل من 3 أرقام — فريد بين الرحلات النشطة. */
 async function generateUniqueBazaarTripCode() {
   const activeStatuses = [
     'pending',
@@ -612,8 +612,8 @@ function computeBazaarReturnExpiresAt(fromMs = Date.now()) {
   return new Date(expireBaghdadUtcMs - baghdadOffsetMs).toISOString();
 }
 
-function isBazaarDeliveryPayload(payload = {}) {
-  return String(payload.serviceKind || '').trim() === 'taxi_delivery';
+function isBazaarDeliveryPayload(_payload = {}) {
+  return false;
 }
 
 // ── حساب المسافة (Haversine) ─────────────────────────────────────
@@ -691,14 +691,13 @@ async function createTaxiRequest(customerPhone, data = {}) {
   }
   const tripType = String(data.tripType || 'one_way').trim();
   const serviceKindRaw = String(data.serviceKind || '').trim();
-  // LEGACY — taxi_delivery / bazaar trips cannot be created; historical reads remain.
   if (
     serviceKindRaw === 'taxi_delivery' ||
     tripType === 'bazaar_round_trip' ||
     tripType === 'bazaar_return_only'
   ) {
-    const err = new Error('خدمة تكسي البازار أُزيلت من التطبيق ولم تعد متاحة لطلبات جديدة.');
-    err.code = 'TAXI_DELIVERY_REMOVED';
+    const err = new Error('هذه الخدمة لم تعد متاحة لطلبات جديدة.');
+    err.code = 'FEATURE_REMOVED';
     err.statusCode = 410;
     throw err;
   }
@@ -734,11 +733,11 @@ async function createTaxiRequest(customerPhone, data = {}) {
     } = require('../../../services/app_config_service');
     const deliveryCfg = await getTaxiDeliveryConfig();
     if (!deliveryCfg.enabled) {
-      throw new Error('خدمة تكسي البازار غير مفعّلة حالياً.');
+      throw new Error('هذه الخدمة غير متاحة حالياً.');
     }
     dropoffLat = Number(deliveryCfg.destinationLat) || 0;
     dropoffLng = Number(deliveryCfg.destinationLng) || 0;
-    dropoffAddress = String(deliveryCfg.destinationNameAr || 'بازار ومطاعم طلب').trim();
+    dropoffAddress = String(deliveryCfg.destinationNameAr || 'وجهة التوصيل').trim();
     taxiType = 'economic';
     if (!pickupLat || !pickupLng) {
       throw new Error('يرجى تحديد نقطة الانطلاق.');
@@ -1680,7 +1679,7 @@ async function updateTaxiRequestStatus(actorPhone, requestId, statusKey, options
     accepted: ['on_way', 'arrived', 'cancelled', 'cancel_requested'],
     arrived: ['picked_up', 'cancelled', 'cancel_requested'],
     // بعد الاستلام: إكمال، أو إلغاء استرداد إن تعطّل الكابتن.
-    // تكسي البازار: من الاستلام → بانتظار العودة (دفع النصف عند البازار).
+    // توصيل ذهاب وعودة: من الاستلام → بانتظار العودة.
     // ذهاب وعودة عادية: بعد الوصول للوجهة → مراحل العودة لنقطة الانطلاق (لا إكمال مباشر).
     picked_up: isBazaarDelivery
       ? ['return_waiting', 'cancelled']
@@ -1726,7 +1725,7 @@ async function updateTaxiRequestStatus(actorPhone, requestId, statusKey, options
     }
   }
 
-  // انتهاء نافذة العودة للبازار: completed من return_waiting فقط عبر النظام/انتهاء الصلاحية أو السائق بعد 2ص
+  // انتهاء نافذة العودة: completed من return_waiting فقط عبر النظام/انتهاء الصلاحية أو السائق بعد 2ص
   if (
     isBazaarDelivery &&
     statusKey === 'completed' &&
@@ -1735,7 +1734,7 @@ async function updateTaxiRequestStatus(actorPhone, requestId, statusKey, options
   ) {
     const expiresAt = Date.parse(String(meta.payload.returnExpiresAt || ''));
     if (!Number.isFinite(expiresAt) || Date.now() < expiresAt) {
-      throw new Error('لا يمكن إنهاء رحلة البازار قبل العودة أو قبل الساعة 2 صباحاً.');
+      throw new Error('لا يمكن إنهاء الرحلة قبل العودة أو قبل الساعة 2 صباحاً.');
     }
   }
 
@@ -1872,7 +1871,7 @@ async function updateTaxiRequestStatus(actorPhone, requestId, statusKey, options
       });
     }
     nextPayload.statusAr = isBazaarDelivery
-      ? 'في الطريق إلى البازار'
+      ? 'في الطريق إلى الوجهة'
       : isOpen
         ? 'في الرحلة — العداد يعمل'
         : 'أنت في الرحلة';
@@ -1909,8 +1908,8 @@ async function updateTaxiRequestStatus(actorPhone, requestId, statusKey, options
       nextPayload.returnExpiresAt =
         nextPayload.returnExpiresAt || computeBazaarReturnExpiresAt();
       nextPayload.statusAr = code
-        ? `وصلت للبازار — ادفع ${due} د.ع. احفظ الكود ${code} للعودة المجانية حتى 2 صباحاً`
-        : 'وصلت للبازار — بانتظار العودة المجانية حتى 2 صباحاً';
+        ? `وصلت للوجهة — ادفع ${due} د.ع. احفظ الكود ${code} للعودة المجانية حتى 2 صباحاً`
+        : 'وصلت للوجهة — بانتظار العودة المجانية حتى 2 صباحاً';
     } else if (isRoundTrip) {
       nextPayload.statusAr = 'وصلت للوجهة — بانتظار بدء العودة لنقطة الانطلاق';
     } else {
@@ -1920,7 +1919,7 @@ async function updateTaxiRequestStatus(actorPhone, requestId, statusKey, options
   }
   if (statusKey === 'return_on_way') {
     nextPayload.statusAr = isBazaarDelivery
-      ? 'الكابتن في طريق العودة المجانية من البازار'
+      ? 'الكابتن في طريق العودة المجانية'
       : isRoundTrip
         ? 'في طريق العودة إلى نقطة انطلاق الزبون'
         : 'في طريق العودة';
@@ -2237,8 +2236,8 @@ async function bumpCustomerTaxiFare(customerPhone, requestId) {
       throw err;
     }
     if (serviceKind === 'taxi_delivery') {
-      const err = new Error('لا يمكن رفع أجرة توصيل البازار من هنا.');
-      err.code = 'BAZAAR';
+      const err = new Error('لا يمكن رفع أجرة هذا النوع من التوصيل.');
+      err.code = 'REMOVED_FEATURE';
       throw err;
     }
 
@@ -2952,7 +2951,7 @@ async function notifyDriversForNewRequest(saved, requestPayloadInput, taxiType, 
   }
 
   if (isBazaarDelivery) {
-    // بازار: إشعار حصري للسائقين المعتمدين — بدون فلتر مسافة (يصل للإشعار دائماً).
+    // توصيل: إشعار حصري للسائقين المعتمدين — بدون فلتر مسافة (يصل للإشعار دائماً).
     const { getTaxiDeliveryConfig, normalizePhoneLast10 } = require('../../../services/app_config_service');
     const deliveryCfg = await getTaxiDeliveryConfig();
     const rejectedSet = new Set(
@@ -2962,7 +2961,7 @@ async function notifyDriversForNewRequest(saved, requestPayloadInput, taxiType, 
       const key = normalizePhoneLast10(phone);
       return key && !rejectedSet.has(key);
     });
-    // لا نُوسّع لكبائن الأولوية — تكسي البازار حصري لمن أُضيفت أرقامهم في لوحة الإدارة فقط.
+    // لا نُوسّع لكبائن الأولوية — التوصيل حصري لمن أُضيفت أرقامهم في لوحة الإدارة فقط.
     if (designated.length === 0) {
       notifyOptions = { restrictToPhones: [] };
     } else {
@@ -3288,7 +3287,7 @@ async function getDriverIncomingRequests(driverPhone, lat, lng, taxiType, radius
   } catch (_) {}
 
   // فلتر SQL بالنوع + حد أقصى 100 — بدل جلب كل الطلبات المعلقة (تأخير واضح).
-  // طلبات تكسي البازار تظهر فقط للسائقين المضافين من لوحة «تكسي البازار».
+  
   const rows = await selectMany(
     'taxi_requests',
     [
@@ -3388,7 +3387,7 @@ async function getDriverIncomingRequests(driverPhone, lat, lng, taxiType, radius
   return withinRadius;
 }
 
-/** طلبات تكسي توصيل البازار الواردة — للسائقين المضافين من لوحة «تكسي البازار» فقط. */
+/** @deprecated removed delivery channel */
 async function getDriverBazaarIncomingRequests(driverPhone) {
   const designated = await isDesignatedBazaarDriver(driverPhone);
   if (!designated) return [];
@@ -3437,11 +3436,11 @@ async function assertDesignatedBazaarDriver(driverPhone) {
   const { getTaxiDeliveryConfig, isPhoneInDesignatedList } = require('../../../services/app_config_service');
   const deliveryCfg = await getTaxiDeliveryConfig();
   if (!deliveryCfg.enabled) {
-    throw new Error('خدمة تكسي البازار غير مفعّلة حالياً.');
+    throw new Error('هذه الخدمة غير متاحة حالياً.');
   }
   const designated = deliveryCfg.designatedDriverPhones || [];
   if (!isPhoneInDesignatedList(normalizedDriver, designated)) {
-    throw new Error('هذا الحساب غير مخصّص لتكسي البازار.');
+    throw new Error('هذا الحساب غير مخصّص لهذه الخدمة.');
   }
   return normalizedDriver;
 }
@@ -3456,10 +3455,7 @@ async function isDesignatedBazaarDriver(driverPhone) {
 }
 
 /**
- * إكمال رحلة الذهاب في تكسي البازار بشكل مستقل:
- * 1) يُكمل طلب الذهاب للكابتن الحالي (يحصل على أجرة الذهاب ويُحرَّر).
- * 2) يُنشئ طلب عودة جديداً بحالة return_waiting (أجرة 0) يُستلم حصرياً
- *    بكود الرحلة (3 أرقام) من أي كابتن بازار — لا يظهر في بركة الطلبات.
+ * @deprecated removed delivery channel — kept for historical trip records.
  */
 async function completeBazaarOutbound(driverPhone, requestId, options = {}) {
   const normalizedDriver = await resolvePhoneKey(driverPhone);
@@ -3475,7 +3471,7 @@ async function completeBazaarOutbound(driverPhone, requestId, options = {}) {
     const meta = readTaxiMeta(row);
 
     if (!isBazaarDeliveryPayload(meta.payload)) {
-      throw new Error('هذا الطلب ليس من طلبات تكسي البازار.');
+      throw new Error('هذا الطلب ليس من نوع التوصيل المدعوم.');
     }
     if (!phonesOverlap(normalizedDriver, meta.driverPhone)) {
       throw new Error('لا يمكنك إنهاء هذه الرحلة — أنت لست الكابتن المخصص لها.');
@@ -3483,7 +3479,7 @@ async function completeBazaarOutbound(driverPhone, requestId, options = {}) {
     const currentStatus =
       String(row.status_key || '') === 'in_progress' ? 'picked_up' : String(row.status_key || '');
     if (currentStatus !== 'picked_up') {
-      throw new Error('الرحلة ليست في مرحلة التحصيل عند البازار.');
+      throw new Error('الرحلة ليست في مرحلة التحصيل عند الوجهة.');
     }
 
     const supabase = assertSupabaseAdmin();
@@ -3550,7 +3546,7 @@ async function completeBazaarOutbound(driverPhone, requestId, options = {}) {
       customerPhone,
       customerName: meta.payload.customerName,
       customerPhoto: meta.payload.customerPhoto || null,
-      pickupAddress: String(meta.payload.originalDropoffAddress || meta.payload.dropoffAddress || 'بازار ومطاعم طلب').trim(),
+      pickupAddress: String(meta.payload.originalDropoffAddress || meta.payload.dropoffAddress || 'وجهة التوصيل').trim(),
       pickupLat: bazaarLat,
       pickupLng: bazaarLng,
       dropoffAddress: String(meta.payload.originalPickupAddress || meta.payload.pickupAddress || '').trim(),
@@ -3617,7 +3613,7 @@ async function completeBazaarOutbound(driverPhone, requestId, options = {}) {
       })
       .eq('id', id);
     if (linkErr) {
-      console.error('taxi bazaar link return request error:', linkErr.message);
+      console.error('taxi return link error:', linkErr.message);
     }
 
     return {
@@ -3632,9 +3628,7 @@ async function completeBazaarOutbound(driverPhone, requestId, options = {}) {
   }
 }
 
-/**
- * التقاط عودة بازار عبر كود 3 أرقام — نفس السائق أو سائق مخصّص آخر.
- */
+/** @deprecated removed delivery channel. */
 async function claimBazaarReturnByCode(driverPhone, tripCode, data = {}) {
   const normalizedDriver = await assertDesignatedBazaarDriver(driverPhone);
   const code = String(tripCode || '').trim();
@@ -3788,7 +3782,7 @@ async function expireDueBazaarReturnTrips() {
       try {
         await expireBazaarReturnTrip(row);
       } catch (e) {
-        console.error('expire bazaar return error:', e?.message || e);
+        console.error('expire return trip error:', e?.message || e);
       }
     }
   }
@@ -3809,7 +3803,7 @@ async function maybeExpireDueBazaarReturnTrips() {
   lastBazaarExpireAt = now;
   bazaarExpireInFlight = expireDueBazaarReturnTrips()
     .catch((error) => {
-      console.warn('expire bazaar return soft-fail:', error?.message || error);
+      console.warn('expire return trip soft-fail:', error?.message || error);
     })
     .finally(() => {
       bazaarExpireInFlight = null;

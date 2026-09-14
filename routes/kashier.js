@@ -103,7 +103,9 @@ router.get('/me', async (req, res) => {
     return res.json({
       merchantPhone: phone,
       staff: req.kashierStaff || null,
-      socketUrl: 'https://socket.alghaithst.com',
+      socketUrl:
+        String(process.env.SOCKET_BROADCAST_URL || process.env.SOCKET_URL || '')
+          .trim() || 'https://socket.hirasite.com',
     });
   } catch (error) {
     return res.status(500).json({ message: error?.message || 'Failed.' });

@@ -225,7 +225,7 @@ router.post('/bump-fare', async (req, res) => {
     const status =
       error?.code === 'NOT_PENDING' ||
       error?.code === 'OPEN_TRIP' ||
-      error?.code === 'BAZAAR' ||
+      error?.code === 'REMOVED_FEATURE' ||
       error?.code === 'MAX_BUMPS' ||
       /يمكن رفع|لا يمكن رفع|الحد الأقصى|غير مصرح|authorized|Request id/i.test(
         message,
@@ -682,29 +682,12 @@ router.get('/incoming-requests', async (req, res) => {
   }
 });
 
-// GET /db/taxi/bazaar/incoming — طلبات تكسي توصيل البازار للسائقين المخصّصين
-router.get('/bazaar/incoming', async (req, res) => {
-  try {
-    const phone = requireOptionalAuthorizedPhone(req, res);
-    if (!phone) return;
-    const requests = await repo.getDriverBazaarIncomingRequests(phone);
-    return res.json(requests.map((item) => hideCustomerPhone(item)));
-  } catch (error) {
-    console.error('taxi bazaar incoming error:', error);
-    return res.status(500).json({ message: error?.message || 'Failed to get bazaar requests.' });
-  }
+router.get('/bazaar/incoming', (_req, res) => {
+  return res.status(410).json({ message: 'هذه الميزة لم تعد متاحة.', code: 'FEATURE_REMOVED' });
 });
 
-// GET /db/taxi/bazaar/is-designated — هل السائق ضمن قائمة تكسي البازار؟
-router.get('/bazaar/is-designated', async (req, res) => {
-  try {
-    const phone = requireOptionalAuthorizedPhone(req, res);
-    if (!phone) return;
-    const designated = await repo.isDesignatedBazaarDriver(phone);
-    return res.json({ designated: Boolean(designated) });
-  } catch (error) {
-    return res.status(500).json({ message: error?.message || 'Failed.' });
-  }
+router.get('/bazaar/is-designated', (_req, res) => {
+  return res.status(410).json({ message: 'هذه الميزة لم تعد متاحة.', code: 'FEATURE_REMOVED' });
 });
 
 // GET /db/taxi/request/:id — جلب طلب واحد (للعرض الفوري عند فتح الإشعار)
@@ -761,48 +744,12 @@ router.get('/admin/metrics', async (req, res) => {
   }
 });
 
-// POST /db/taxi/bazaar/complete-outbound — إكمال رحلة الذهاب وإنشاء طلب عودة مستقل
-router.post('/bazaar/complete-outbound', async (req, res) => {
-  try {
-    const phone = requireOptionalAuthorizedPhone(req, res);
-    if (!phone) return;
-    const requestId = String(req.body?.requestId || req.body?.id || '').trim();
-    if (!requestId) {
-      return res.status(400).json({ message: 'Request id is required.' });
-    }
-    const collectedFare = req.body?.collectedFare ?? req.body?.fare;
-    const result = await repo.completeBazaarOutbound(phone, requestId, {
-      collectedFare,
-    });
-    return res.json(result);
-  } catch (error) {
-    console.error('taxi bazaar complete-outbound error:', error);
-    const status = String(error?.message || '').includes('لا يمكنك')
-      ? 403
-      : 500;
-    return res.status(status).json({ message: error?.message || 'Failed to complete outbound.' });
-  }
+router.post('/bazaar/complete-outbound', (_req, res) => {
+  return res.status(410).json({ message: 'هذه الميزة لم تعد متاحة.', code: 'FEATURE_REMOVED' });
 });
 
-// POST /db/taxi/bazaar/claim-return — التقاط عودة عبر كود 3 أرقام
-router.post('/bazaar/claim-return', async (req, res) => {
-  try {
-    const phone = requireOptionalAuthorizedPhone(req, res);
-    if (!phone) return;
-    const { tripCode, driverName, vehicleModel, plateNumber, driverPhoto, carImage } =
-      req.body || {};
-    const result = await repo.claimBazaarReturnByCode(phone, tripCode, {
-      driverName,
-      vehicleModel,
-      plateNumber,
-      driverPhoto,
-      carImage,
-    });
-    return res.json(hideCustomerPhone(result));
-  } catch (error) {
-    console.error('taxi bazaar claim-return error:', error);
-    return res.status(500).json({ message: error?.message || 'Failed to claim return.' });
-  }
+router.post('/bazaar/claim-return', (_req, res) => {
+  return res.status(410).json({ message: 'هذه الميزة لم تعد متاحة.', code: 'FEATURE_REMOVED' });
 });
 
 // GET /db/taxi/favorite-places — أماكن مفضلة للزبون

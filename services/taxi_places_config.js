@@ -373,7 +373,7 @@ async function extractPlacesAround({ latitude, longitude, radiusKm, types }) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
-          'User-Agent': 'AlGhaithAdmin/1.0 (taxi places extraction)',
+          'User-Agent': 'HiraAdmin/1.0 (taxi places extraction)',
         },
         body,
         signal: controller.signal,

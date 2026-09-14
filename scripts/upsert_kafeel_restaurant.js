@@ -28,7 +28,7 @@ const {
 
 const PHONE = '07844258400';
 const STORE_NAME = 'مطعم الكفيل';
-const ADDRESS = 'الصويرة . الشارع العام . بازار ومطاعم طلب';
+const ADDRESS = 'الصويرة - الشارع العام';
 const LAT = 32.9488919;
 const LNG = 44.7766857;
 

@@ -129,7 +129,7 @@ router.put('/merchant-product', async (req, res) => {
       });
     }
     const status =
-      message === 'BAZAAR_CHANNEL_REMOVED'
+      message === 'FEATURE_REMOVED' || message === 'BAZAAR_CHANNEL_REMOVED'
         ? 410
         : message === 'SECTION_REQUIRED' || message === 'SECTION_NOT_FOUND'
           ? 400
@@ -144,8 +144,8 @@ router.put('/merchant-product', async (req, res) => {
         ? 'يجب اختيار قسم للمنتج قبل الحفظ.'
         : message === 'SECTION_NOT_FOUND'
           ? 'القسم المحدد غير موجود. حدّث الأقسام ثم أعد المحاولة.'
-          : message === 'BAZAAR_CHANNEL_REMOVED'
-            ? 'قناة بازار طلب أُزيلت من التطبيق ولم تعد متاحة للنشر.'
+          : message === 'FEATURE_REMOVED' || message === 'BAZAAR_CHANNEL_REMOVED'
+            ? 'هذه الميزة لم تعد متاحة.'
             : message;
     return res.status(status).json({
       message: arabicMessage,

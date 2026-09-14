@@ -1,0 +1,11 @@
+# Hira API — link YOUR Railway project once via .\scripts\link-backend-railway.ps1
+# Deploy from repo root: .\scripts\deploy-backend-railway.ps1
+# Do NOT run `railway up` from the repo root — service root is backend/.
+
+[build]
+builder = "nixpacks"
+
+[deploy]
+startCommand = "npm start"
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 10

@@ -1,0 +1,33 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "checkJs": true,
+    "strict": false,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./*"]
+    }
+  },
+  "include": [
+    "server.js",
+    "routes/**/*.js",
+    "supabase_repo/**/*.js",
+    "lib/**/*.js",
+    "services/**/*.js",
+    "push/**/*.js",
+    "push_notifications.js",
+    "push_events.js",
+    "push_scheduler.js",
+    "promo_codes.js"
+  ],
+  "exclude": [
+    "node_modules",
+    "tests"
+  ]
+}

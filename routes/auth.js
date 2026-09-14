@@ -24,6 +24,11 @@ const otpiqBaseUrl = (process.env.OTPIQ_BASE_URL || 'https://api.otpiq.com').rep
 const otpiqSmsProvider = process.env.OTPIQ_SMS_PROVIDER || 'sms';
 const otpiqWhatsappProvider = process.env.OTPIQ_WHATSAPP_PROVIDER || 'whatsapp';
 const otpiqTelegramProvider = process.env.OTPIQ_TELEGRAM_PROVIDER || 'telegram';
+const otpDefaultChannel = String(process.env.OTP_DEFAULT_CHANNEL || 'whatsapp')
+  .trim()
+  .toLowerCase();
+const otpWhatsappOnly =
+  String(process.env.OTP_WHATSAPP_ONLY || 'true').trim().toLowerCase() === 'true';
 const otpTtlMs = Number.parseInt(process.env.OTP_TTL_MS || '300000', 10);
 const parsedOtpLength = Number.parseInt(process.env.OTP_LENGTH || '6', 10);
 const otpLength =
@@ -114,8 +119,8 @@ function cleanupExpiredOtps() {
   }
 }
 
-function resolveOtpiqProvider(channel = 'sms') {
-  const normalizedChannel = String(channel || 'sms').trim().toLowerCase();
+function resolveOtpiqProvider(channel = otpDefaultChannel) {
+  const normalizedChannel = String(channel || otpDefaultChannel).trim().toLowerCase();
   if (normalizedChannel === 'whatsapp') {
     return otpiqWhatsappProvider;
   }
@@ -125,7 +130,7 @@ function resolveOtpiqProvider(channel = 'sms') {
   return otpiqSmsProvider;
 }
 
-async function sendOtpViaOtpiq(phoneNumber, verificationCode, channel = 'sms') {
+async function sendOtpViaOtpiq(phoneNumber, verificationCode, channel = otpDefaultChannel) {
   if (!otpiqApiKey) {
     throw new Error('OTPIQ_API_KEY is not configured.');
   }
@@ -271,9 +276,15 @@ router.post('/send-code', authSendCodeLimiter, async (req, res) => {
     cleanupExpiredOtps();
 
     const phone = normalizePhone(req.body?.phone);
-    const channel = String(req.body?.channel || 'sms').trim().toLowerCase();
+    const channel = String(req.body?.channel || otpDefaultChannel).trim().toLowerCase();
     if (!phone) {
       return res.status(400).json({ message: 'Phone number is required.' });
+    }
+    if (otpWhatsappOnly && channel !== 'whatsapp') {
+      return res.status(400).json({
+        message: 'OTP is available via WhatsApp only.',
+        messageAr: 'رمز التحقق يُرسل عبر واتساب فقط.',
+      });
     }
 
     if (isAppleReviewPhone(phone)) {

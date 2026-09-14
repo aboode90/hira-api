@@ -1605,6 +1605,14 @@ async function toggleCourierApprovalStatus(adminPhone, courierPhone, isApproved)
       p_approved: Boolean(isApproved),
     });
     if (!error) {
+      if (Boolean(isApproved)) {
+        const supabaseRole = assertSupabaseAdmin();
+        await supabaseRole
+          .from('app_users')
+          .update({ role: 'delivery', account_type: 'delivery' })
+          .eq('phone', phoneKey);
+      }
+
       const user = await getAppUser(phoneKey);
       const profile = (await getCourierProfile(phoneKey)) || {};
       const mapped = mapCourierForAdmin(phoneKey, user, profile);
@@ -1640,6 +1648,14 @@ async function toggleCourierApprovalStatus(adminPhone, courierPhone, isApproved)
     delete nextProfile.rejectedAt;
   }
   await saveCourierProfile(phoneKey, nextProfile);
+
+  if (Boolean(isApproved)) {
+    const supabase = assertSupabaseAdmin();
+    await supabase
+      .from('app_users')
+      .update({ role: 'delivery', account_type: 'delivery' })
+      .eq('phone', phoneKey);
+  }
 
   const user = await getAppUser(phoneKey);
   const mapped = mapCourierForAdmin(phoneKey, user, nextProfile);
@@ -3581,15 +3597,20 @@ async function preRegisterCourierAccount(adminPhone, payload = {}) {
 
   if (!existingUser) {
     await saveAppUser(phoneKey, {
-      role: 'customer',
-      account_type: 'marketplace',
+      role: 'delivery',
+      account_type: 'delivery',
       full_name: fullName,
     });
   } else {
     const existingName = String(existingUser.full_name ?? '').trim();
+    const patch = {
+      role: 'delivery',
+      account_type: 'delivery',
+    };
     if (!existingName && fullName) {
-      await saveAppUser(phoneKey, { full_name: fullName });
+      patch.full_name = fullName;
     }
+    await saveAppUser(phoneKey, patch);
   }
 
   const savedProfile = await saveCourierProfile(phoneKey, {

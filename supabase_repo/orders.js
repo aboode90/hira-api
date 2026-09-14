@@ -109,6 +109,32 @@ async function resolveDeliveryActor(phone) {
     };
   }
 
+  // ملف مندوب معتمد حتى لو لم يُحدَّث app_users.role بعد (حسابات متعددة الأدوار).
+  const courierProfile = await getCourierProfile(normalizedPhone);
+  if (courierProfile) {
+    const approved =
+      courierProfile?.isApproved === true ||
+      courierProfile?.is_approved === true ||
+      String(
+        courierProfile?.approvalStatus ?? courierProfile?.approval_status ?? '',
+      ) === 'approved';
+    const active =
+      approved &&
+      courierProfile?.available !== false &&
+      courierProfile?.isSuspended !== true &&
+      courierProfile?.is_suspended !== true;
+    if (active) {
+      return {
+        phone: normalizedPhone,
+        role: 'delivery',
+        active: true,
+        name: String(
+          courierProfile?.name ?? courierProfile?.displayName ?? '',
+        ).trim(),
+      };
+    }
+  }
+
   return { phone: normalizedPhone, role, active: false, name: '' };
 }
 

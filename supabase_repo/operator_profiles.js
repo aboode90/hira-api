@@ -326,6 +326,12 @@ async function saveCourierProfile(phone, patch = {}) {
     buildCourierRow(phoneKey, merged),
   );
   await saveRow('courier_profiles', row, 'phone');
+  // مثل السائق: ربط الحساب بدور المندوب في app_users.
+  const supabase = assertSupabaseAdmin();
+  await supabase
+    .from('app_users')
+    .update({ role: 'delivery', account_type: 'delivery' })
+    .eq('phone', phoneKey);
   return rowToCourierProfileMap(row);
 }
 
